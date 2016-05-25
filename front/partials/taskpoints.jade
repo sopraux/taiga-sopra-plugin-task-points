@@ -1,0 +1,56 @@
+div(contrib-bank-taskpoints, ng-controller="ContribTaskPointsAdminController as ctrl")
+    header
+        h1
+            span.project-name {{::project.name}}
+            span.green {{::sectionName}}
+
+    form
+        fieldset
+            div.check-item
+                span Activate Plugin
+                div.check
+                    input(type="checkbox" name="active" ng-model="settings.active")
+                    div
+                    span.check-text.check-yes(translate="COMMON.YES")
+                    span.check-text.check-no(translate="COMMON.NO")
+
+            label(for="ep_name") Estimated Points custom name
+            div.contrib-form-wrapper
+                fieldset.contrib-input
+                    input(
+                        type="text"
+                        name="ep_name"
+                        ng-model="settings.ep_name"
+                        placeholder="Estimated Points"
+                        id="ep_name"
+                    )
+            label(for="rp_name") Real Points custom name
+            div.contrib-form-wrapper
+                fieldset.contrib-input
+                    input(
+                        type="text"
+                        name="rp_name"
+                        ng-model="settings.rp_name"
+                        placeholder="Real Points"
+                        id="rp_name"
+                    )
+            label(for="tt_name") Task Type custom name
+            div.contrib-form-wrapper
+                fieldset.contrib-input
+                    input(
+                        type="text"
+                        name="tt_name"
+                        ng-model="settings.tt_name"
+                        placeholder="Type"
+                        id="tt_name"
+                    )
+
+
+        button.button-green.submit-button(
+            type="submit"
+            title="{{'COMMON.SAVE' | translate}}"
+            translate="COMMON.SAVE"
+        )
+
+        tg-svg(svg-icon="icon-question")
+        span Do you need help? Check out our support page!

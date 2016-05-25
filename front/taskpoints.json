@@ -1,0 +1,9 @@
+{
+    "name": "task points",
+    "slug": "task points",
+    "description": "Include task points in Taiga.",
+    "type": "admin",
+    "module": "taigaContrib.taskpoints",
+    "template": "/plugins/taskpoints/taskpoints.html",
+    "js": "/plugins/taskpoints/taskpoints.js"
+}
