@@ -23,8 +23,8 @@ def connect_taiga_contrib_taskpoints_signals():
     from django.db.models import signals
     from taiga.projects.history.models import HistoryEntry
     from . import signal_handlers as handlers
-    signals.pre_save.connect(handlers.on_task_custom_field_update,
-                              sender=apps.get_model("tasks", "Task"),
+    signals.post_save.connect(handlers.on_task_custom_field_update,
+                              sender=apps.get_model("custom_attributes", "TaskCustomAttributesValues"),
                               dispatch_uid="taiga_contrib_taskpoints")
 
 
@@ -40,10 +40,9 @@ class TaigaContribTaskPointsAppConfig(AppConfig):
     def ready(self):
         from taiga.base import routers
         from taiga.urls import urlpatterns
-        from .api import TaskPointsViewSet, TaskPointsSettingsViewSet
+        from .api import TaskPointsSettingsViewSet
 
         router = routers.DefaultRouter(trailing_slash=False)
-        router.register(r"taskpoints", TaskPointsViewSet, base_name="taskpoints")
         router.register(r"taskpoints_settings", TaskPointsSettingsViewSet, base_name="taskpoints_settings")
         urlpatterns.append(url(r'^api/v1/', include(router.urls)))
 

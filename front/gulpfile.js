@@ -33,7 +33,7 @@ gulp.task('compile', function() {
 
     return merge(jade, coffee)
         .pipe($.concat('taskpoints.js'))
-        .pipe($.uglify({mangle:false, preserveComments: false}))
+        //.pipe($.uglify({mangle:false, preserveComments: false}))
         .pipe(gulp.dest(paths.dist));
 });
 

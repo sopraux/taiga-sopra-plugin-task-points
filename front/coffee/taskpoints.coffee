@@ -41,25 +41,28 @@ class TaskPointsAdmin
         @scope.sectionSlug = "task points"
 
         @scope.$on "project:loaded", =>
-            promise = @repo.queryMany("task_points_settings", {project: @scope.projectId})
+            promise = @repo.queryMany("taskpoints_settings", {project: @scope.projectId})
 
             promise.then (task_points_settings) =>
-                @scope.setting = {
+                @scope.settings = {
                     project: @scope.projectId,
                     active: false
                 }
+                pId = @scope.projectId
+                console.log(@scope.projectId)
                 if task_points_settings.length > 0
-                    @scope.setting = task_points_settings[0]
+                    @scope.settings = task_points_settings[0]
                 #title = "#{@scope.sectionName} - Plugins - #{@scope.project.name}" # i18n
                 #description = @scope.project.description
             #@appMetaService.setAll(title, description)
 
-    activate: (@rootScope, @scope, @repo, @appMetaService, @confirm, @http, @urls) ->
-        url = @urls.resolve("taskpoints_settings")
-        @http.post("#{url}/activate", {})
+    activate: (@http, @repo, @scope) ->
+        #url = @urls.resolve("taskpoints_settings")
+        @http.post(@repo.resolveUrlForModel(@scope.settings) + '/activate')
+        #@http.post("#{url}/#{id}/activate", {})
 
 
-TaskPointsDirective = ($repo, $confirm, $loading) ->
+TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
     link = ($scope, $el, $attrs) ->
         form = $el.find("form").checksley({"onlyOneErrorElement": true})
         submit = debounce 2000, (event) =>
@@ -71,17 +74,19 @@ TaskPointsDirective = ($repo, $confirm, $loading) ->
                 .target(submitButton)
                 .start()
 
-            if not $scope.settings.id
-                promise = $repo.create("task_points_settings", $scope.settings)
-                promise.then (data) ->
-                    $scope.settings = data
-            else
-                promise = $repo.save($scope.settings)
-                promise.then (data) ->
-                    $scope.settings = data
-
             if $scope.settings.active
-                TaskPointsAdmin.activate()
+                if not $scope.settings.id
+                    promise = $repo.create("taskpoints_settings", $scope.settings)
+                    promise.then (data) ->
+                        $scope.settings = data
+
+                else
+                    promise = $repo.save($scope.settings)
+                    promise.then (data) ->
+                        $scope.settings = data
+
+
+                TaskPointsAdmin.prototype.activate($http, $repo, $scope)
 
 
             promise.then (data)->
@@ -104,7 +109,7 @@ TaskPointsDirective = ($repo, $confirm, $loading) ->
 module = angular.module('taigaContrib.taskpoints', [])
 
 module.controller("ContribTaskPointsAdminController", TaskPointsAdmin)
-module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", TaskPointsDirective])
+module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", TaskPointsDirective])
 
 initTaskPointsPlugin = ($tgUrls) ->
     $tgUrls.update({

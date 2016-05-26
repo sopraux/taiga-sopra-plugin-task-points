@@ -47,9 +47,9 @@ class TaskPointsSettings(models.Model):
                                       default='Type',
                                       verbose_name=_("task type name"))
 
-    ep_index = models.IntegerField(null=False, blank=True,
+    ep_index = models.IntegerField(null=True, blank=True,
                                             verbose_name=_("estimated points index"))
-    rp_index = models.IntegerField(null=False, blank=True,
+    rp_index = models.IntegerField(null=True, blank=True,
                                             verbose_name=_("real points index"))
-    tt_index = models.IntegerField(null=False, blank=True,
+    tt_index = models.IntegerField(null=True, blank=True,
                                             verbose_name=_("task type index"))

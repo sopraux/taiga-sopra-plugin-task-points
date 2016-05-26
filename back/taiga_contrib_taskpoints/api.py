@@ -18,7 +18,7 @@
 from taiga.base import filters
 from taiga.base import response
 from taiga.base.api import ModelCrudViewSet
-from taiga.base.decorators import list_route
+from taiga.base.decorators import detail_route, list_route
 
 from . import models
 from . import serializers
@@ -29,17 +29,17 @@ from . import services
 class TaskPointsSettingsViewSet(ModelCrudViewSet):
     model = models.TaskPointsSettings
     serializer_class = serializers.TaskPointsSettingsSerializer
-    permission_classes = (permissions.TaskPointsSettingsPermission)
+    permission_classes = (permissions.TaskPointsSettingsPermission,)
+    filter_backends = (filters.IsProjectAdminFilterBackend,)
     filter_fields = ("project",)
 
-    @detail_route(methods=['post'])
+    @detail_route(methods=['POST'])
     def activate(self, request, pk=None):
-
         task_points_settings = self.get_object()
 
         self.check_permissions(request, 'activate', task_points_settings)
 
-        services.create_custom_attributes_task_points(self)
-        services.update_all_tasks_values(self)
+        services.create_custom_attributes_task_points(task_points_settings)
+        services.update_all_tasks_values(task_points_settings)
 
         return response.NoContent()

@@ -16,10 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import services
+from .models import TaskPointsSettings
+from taiga.projects.tasks.models import Task
 
 
 
-def on_task_custom_field_update(sender, task, **kwargs):
+def on_task_custom_field_update(sender, instance, **kwargs):
+
+    task = instance.task
 
     project = task.project
 
@@ -31,4 +35,4 @@ def on_task_custom_field_update(sender, task, **kwargs):
     if not settings.active:
         return None
 
-    services.update_task_subject(task, settings, False)
+    services.update_task_subject(task, settings)
