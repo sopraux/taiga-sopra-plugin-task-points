@@ -43,3 +43,14 @@ class TaskPointsSettingsViewSet(ModelCrudViewSet):
         services.update_all_tasks_values(task_points_settings)
 
         return response.NoContent()
+
+
+    @detail_route(methods=['POST'])
+    def deactivate(self, request, pk=None):
+        task_points_settings = self.get_object()
+
+        self.check_permissions(request, 'deactivate', task_points_settings)
+
+        services.clear_all_tasks_subject(task_points_settings)
+
+        return response.NoContent()

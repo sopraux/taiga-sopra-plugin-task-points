@@ -48,8 +48,7 @@ class TaskPointsAdmin
                     project: @scope.projectId,
                     active: false
                 }
-                pId = @scope.projectId
-                console.log(@scope.projectId)
+                
                 if task_points_settings.length > 0
                     @scope.settings = task_points_settings[0]
                 #title = "#{@scope.sectionName} - Plugins - #{@scope.project.name}" # i18n
@@ -57,9 +56,10 @@ class TaskPointsAdmin
             #@appMetaService.setAll(title, description)
 
     activate: (@http, @repo, @scope) ->
-        #url = @urls.resolve("taskpoints_settings")
         @http.post(@repo.resolveUrlForModel(@scope.settings) + '/activate')
-        #@http.post("#{url}/#{id}/activate", {})
+
+    deactivate: (@http, @repo, @scope) ->
+        @http.post(@repo.resolveUrlForModel(@scope.settings) + '/deactivate')
 
 
 TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
@@ -74,22 +74,21 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
                 .target(submitButton)
                 .start()
 
-            if $scope.settings.active
-                if not $scope.settings.id
-                    promise = $repo.create("taskpoints_settings", $scope.settings)
-                    promise.then (data) ->
-                        $scope.settings = data
 
-                else
-                    promise = $repo.save($scope.settings)
-                    promise.then (data) ->
-                        $scope.settings = data
-
-
-                TaskPointsAdmin.prototype.activate($http, $repo, $scope)
-
+            if not $scope.settings.id
+                promise = $repo.create("taskpoints_settings", $scope.settings)
+                promise.then (data) ->
+                    $scope.settings = data
+            else
+                promise = $repo.save($scope.settings)
+                promise.then (data) ->
+                    $scope.settings = data
 
             promise.then (data)->
+                if $scope.settings.active
+                    TaskPointsAdmin.prototype.activate($http, $repo, $scope)
+                else if $scope.settings.id
+                    TaskPointsAdmin.prototype.deactivate($http, $repo, $scope)
                 currentLoading.finish()
                 $confirm.notify("success")
 

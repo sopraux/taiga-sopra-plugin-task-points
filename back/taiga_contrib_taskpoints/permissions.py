@@ -31,6 +31,7 @@ class TaskPointsSettingsPermission(TaigaResourcePermission):
     retrieve_perms = IsProjectAdmin()
     create_perms = IsProjectAdmin()
     activate_perms = IsProjectAdmin()
+    deactivate_perms = IsProjectAdmin()
     update_perms = IsProjectAdmin()
     destroy_perms = IsProjectAdmin()
     list_perms = AllowAny()

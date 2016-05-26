@@ -68,7 +68,7 @@ def create_custom_attributes_task_points(settings):
             has_rp = True
         elif attribute.name == TASK_TYPE:
             has_tt = True
-
+    #import pdb; pdb.set_trace()
     if not has_ep:
         TaskCustomAttribute.objects.create(project=project, name=ESTIMATED_POINTS)
     if not has_rp:
@@ -88,7 +88,7 @@ def create_custom_attributes_task_points(settings):
 def update_task_subject(task, settings):
 
     task_attributes_values = TaskCustomAttributesValues.objects.get(task=task).attributes_values
-    #import pdb; pdb.set_trace()
+
     estimated_points = None
     real_points      = None
     task_type        = None
@@ -126,11 +126,31 @@ def update_task_subject(task, settings):
     task.save(update_fields=['subject'])
 
 
+def clear_task_subject(task):
+
+    if len(task.subject.split('|')) > 1:
+        task_subject = task.subject.split('|')[1]
+    else:
+        task_subject = task.subject
+
+    task.subject = task_subject
+    task.save(update_fields=['subject'])
+
+
 def update_all_tasks_values(settings):
     try:
         tasks = Task.objects.filter(project=settings.project)
         for task in tasks:
             update_task_subject(task, settings)
+
+    except Task.DoesNotExist:
+        pass
+
+def clear_all_tasks_subject(settings):
+    try:
+        tasks = Task.objects.filter(project=settings.project)
+        for task in tasks:
+            clear_task_subject(task)
 
     except Task.DoesNotExist:
         pass

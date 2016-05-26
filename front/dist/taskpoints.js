@@ -1,4 +1,3 @@
-angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("/plugins/taskpoints/taskpoints.html","\n<div contrib-task-points=\"contrib-task-points\" ng-controller=\"ContribTaskPointsAdminController as ctrl\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <div class=\"check-item\"><span>Activate Plugin</span>\n        <div class=\"check\">\n          <input type=\"checkbox\" name=\"active\" ng-model=\"settings.active\"/>\n          <div></div><span translate=\"COMMON.YES\" class=\"check-text check-yes\"></span><span translate=\"COMMON.NO\" class=\"check-text check-no\"></span>\n        </div>\n      </div>\n      <label for=\"ep_name\">Estimated Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"ep_name\" ng-model=\"settings.ep_name\" placeholder=\"Estimated Points\" id=\"ep_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"rp_name\">Real Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"rp_name\" ng-model=\"settings.rp_name\" placeholder=\"Real Points\" id=\"rp_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"tt_name\">Task Type custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"tt_name\" ng-model=\"settings.tt_name\" placeholder=\"Type\" id=\"tt_name\"/>\n        </fieldset>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"{{\'COMMON.SAVE\' | translate}}\" translate=\"COMMON.SAVE\" class=\"button-green submit-button\"></button>\n    <tg-svg svg-icon=\"icon-question\"></tg-svg><span>Do you need help? Check out our support page!</span>\n  </form>\n</div>");}]);
 
 /*
  * Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
@@ -53,13 +52,10 @@ angular.module("templates").run(["$templateCache", function($templateCache) {$te
             project: _this.scope.projectId
           });
           return promise.then(function(task_points_settings) {
-            var pId;
             _this.scope.settings = {
               project: _this.scope.projectId,
               active: false
             };
-            pId = _this.scope.projectId;
-            console.log(_this.scope.projectId);
             if (task_points_settings.length > 0) {
               return _this.scope.settings = task_points_settings[0];
             }
@@ -73,6 +69,13 @@ angular.module("templates").run(["$templateCache", function($templateCache) {$te
       this.repo = repo;
       this.scope = scope;
       return this.http.post(this.repo.resolveUrlForModel(this.scope.settings) + '/activate');
+    };
+
+    TaskPointsAdmin.prototype.deactivate = function(http, repo, scope) {
+      this.http = http;
+      this.repo = repo;
+      this.scope = scope;
+      return this.http.post(this.repo.resolveUrlForModel(this.scope.settings) + '/deactivate');
     };
 
     return TaskPointsAdmin;
@@ -94,21 +97,23 @@ angular.module("templates").run(["$templateCache", function($templateCache) {$te
             return;
           }
           currentLoading = $loading().target(submitButton).start();
-          if ($scope.settings.active) {
-            if (!$scope.settings.id) {
-              promise = $repo.create("taskpoints_settings", $scope.settings);
-              promise.then(function(data) {
-                return $scope.settings = data;
-              });
-            } else {
-              promise = $repo.save($scope.settings);
-              promise.then(function(data) {
-                return $scope.settings = data;
-              });
-            }
-            TaskPointsAdmin.prototype.activate($http, $repo, $scope);
+          if (!$scope.settings.id) {
+            promise = $repo.create("taskpoints_settings", $scope.settings);
+            promise.then(function(data) {
+              return $scope.settings = data;
+            });
+          } else {
+            promise = $repo.save($scope.settings);
+            promise.then(function(data) {
+              return $scope.settings = data;
+            });
           }
           promise.then(function(data) {
+            if ($scope.settings.active) {
+              TaskPointsAdmin.prototype.activate($http, $repo, $scope);
+            } else if ($scope.settings.id) {
+              TaskPointsAdmin.prototype.deactivate($http, $repo, $scope);
+            }
             currentLoading.finish();
             return $confirm.notify("success");
           });
@@ -146,3 +151,5 @@ angular.module("templates").run(["$templateCache", function($templateCache) {$te
   module.run(["$tgUrls", initTaskPointsPlugin]);
 
 }).call(this);
+
+angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("/plugins/taskpoints/taskpoints.html","\n<div contrib-task-points=\"contrib-task-points\" ng-controller=\"ContribTaskPointsAdminController as ctrl\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <div class=\"check-item\"><span>Activate Plugin</span>\n        <div class=\"check\">\n          <input type=\"checkbox\" name=\"active\" ng-model=\"settings.active\"/>\n          <div></div><span translate=\"COMMON.YES\" class=\"check-text check-yes\"></span><span translate=\"COMMON.NO\" class=\"check-text check-no\"></span>\n        </div>\n      </div>\n      <label for=\"ep_name\">Estimated Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"ep_name\" ng-model=\"settings.ep_name\" placeholder=\"Estimated Points\" id=\"ep_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"rp_name\">Real Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"rp_name\" ng-model=\"settings.rp_name\" placeholder=\"Real Points\" id=\"rp_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"tt_name\">Task Type custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"tt_name\" ng-model=\"settings.tt_name\" placeholder=\"Type\" id=\"tt_name\"/>\n        </fieldset>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"{{\'COMMON.SAVE\' | translate}}\" translate=\"COMMON.SAVE\" class=\"button-green submit-button\"></button>\n    <tg-svg svg-icon=\"icon-question\"></tg-svg><span>Do you need help? Check out our support page!</span>\n  </form>\n</div>");}]);

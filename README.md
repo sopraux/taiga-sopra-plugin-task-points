@@ -25,12 +25,11 @@ Modify in `taiga-back` your `settings/local.py` and include the line:
   INSTALLED_APPS += ["taiga_contrib_taskpoints"]
 ```
 
-Then run the migrations to generate the new need table and apply the patch:
+Then run the migrations to generate the new need table:
 
 ```bash
   python manage.py makemigrations taiga_contrib_taskpoints
   python manage.py migrate taiga_contrib_taskpoints
-  python ../taiga-contrib-taskpoints/back/patch/patch-taiga-taskpoints.py .
 ```
 
 #### Taiga Front
@@ -79,7 +78,6 @@ Then run the migrations to generate the new need table:
 ```bash
   python manage.py makemigrations taiga_contrib_taskpoints
   python manage.py migrate taiga_contrib_taskpoints
-  python ../taiga-contrib-taskpoints/back/patch/patch-taiga-taskpoints.py .
 ```
 
 #### Taiga Front
