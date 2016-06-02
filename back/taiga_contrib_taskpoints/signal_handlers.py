@@ -23,9 +23,9 @@ from taiga.projects.tasks.models import Task
 
 def on_task_custom_field_update(sender, instance, **kwargs):
 
-    task = instance.task
-
-    project = task.project
+    task        = instance.task
+    userstory   = task.user_story
+    project     = task.project
 
     try:
         settings = TaskPointsSettings.objects.get(project=project)
@@ -36,3 +36,5 @@ def on_task_custom_field_update(sender, instance, **kwargs):
         return None
 
     services.update_task_subject(task, settings)
+    services.update_roles(task, settings)
+    services.update_userstory_points(userstory, settings)

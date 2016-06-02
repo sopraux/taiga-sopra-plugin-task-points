@@ -40,7 +40,7 @@ class TaskPointsSettingsViewSet(ModelCrudViewSet):
         self.check_permissions(request, 'activate', task_points_settings)
 
         services.create_custom_attributes_task_points(task_points_settings)
-        services.update_all_tasks_values(task_points_settings)
+        services.update_all_tasks_values(task_points_settings) # Se activa el signal handler on_task_custom_field_update
 
         return response.NoContent()
 

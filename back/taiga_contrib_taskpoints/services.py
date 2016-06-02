@@ -1,7 +1,6 @@
 # Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
 # Copyright (C) 2014-2016 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014-2016 David Barragán <bameda@dbarragan.com>
-# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
@@ -16,9 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils import timezone
+from django.db.models import Max
+from django.core.exceptions import ObjectDoesNotExist
 
 from taiga.projects.custom_attributes.models import TaskCustomAttribute, TaskCustomAttributesValues
 from taiga.projects.tasks.models import Task
+from taiga.projects.userstories.models import RolePoints
+from taiga.projects.models import Points
+from taiga.users.models import Role
 from .models import TaskPoints, TaskPointsSettings
 
 import datetime
@@ -46,6 +50,39 @@ def get_custom_attributes_index(settings):
         return None
 
     return index
+
+
+def get_estimated_points(task, settings):
+    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+    estimated_points = None
+    ep_index = str(settings.ep_index)
+
+    if ep_index in task_attributes and task_attributes[ep_index] != '':
+        estimated_points    = float( task_attributes[ep_index] )
+
+    return estimated_points
+
+
+def get_real_points(task, settings):
+    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+    real_points      = None
+    rp_index = str(settings.rp_index)
+
+    if rp_index in task_attributes and task_attributes[rp_index] != '':
+        real_points         = float( task_attributes[rp_index] )
+
+    return real_points
+
+
+def get_task_type(task, settings):
+    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+    task_type        = None
+    tt_index = str(settings.tt_index)
+
+    if tt_index in task_attributes:
+        task_type           = task_attributes[tt_index]
+
+    return task_type
 
 
 def create_custom_attributes_task_points(settings):
@@ -87,22 +124,9 @@ def create_custom_attributes_task_points(settings):
 
 def update_task_subject(task, settings):
 
-    task_attributes_values = TaskCustomAttributesValues.objects.get(task=task).attributes_values
-
-    estimated_points = None
-    real_points      = None
-    task_type        = None
-    ep_index = str(settings.ep_index)
-    rp_index = str(settings.rp_index)
-    tt_index = str(settings.tt_index)
-
-
-    if ep_index in task_attributes_values and task_attributes_values[ep_index] != '':
-        estimated_points    = float( task_attributes_values[ep_index] )
-    if rp_index in task_attributes_values and task_attributes_values[rp_index] != '':
-        real_points         = float( task_attributes_values[rp_index] )
-    if tt_index in task_attributes_values:
-        task_type           = task_attributes_values[tt_index]
+    estimated_points = get_estimated_points(task, settings)
+    real_points      = get_real_points(task, settings)
+    task_type        = get_task_type(task, settings)
 
     if len(task.subject.split('|')) > 1:
         task_subject = task.subject.split('|')[1]
@@ -146,6 +170,7 @@ def update_all_tasks_values(settings):
     except Task.DoesNotExist:
         pass
 
+
 def clear_all_tasks_subject(settings):
     try:
         tasks = Task.objects.filter(project=settings.project)
@@ -154,3 +179,60 @@ def clear_all_tasks_subject(settings):
 
     except Task.DoesNotExist:
         pass
+
+
+def update_roles(task, settings):
+
+    task_type = get_task_type(task, settings)
+
+    if task_type == None or task_type == '':
+        task_type = 'Unnasigned'
+    try:
+        role = Role.objects.get(project=settings.project, name=task_type)
+    except Role.DoesNotExist:
+        order = 10 + Role.objects.filter(project=settings.project).aggregate(Max('order'))['order__max']
+        Role.objects.create(
+                name = task_type,
+                order = order,
+                project = settings.project,
+                computable = True
+        )
+
+
+def update_userstory_points(userstory, settings):
+    project = settings.project
+    tasks = Task.objects.filter(user_story=userstory)
+    points = {}
+
+    for task in tasks:
+        estimated_points = get_estimated_points(task, settings)
+        task_type        = get_task_type(task, settings)
+        if task_type == None or task_type == '':
+            task_type = 'Unnasigned'
+
+        try:
+            role = Role.objects.get(name=task_type, project=project)
+
+            if role.name in points:
+                points[role.name] += estimated_points
+            else:
+                points[role.name] = estimated_points
+
+        except ObjectDoesNotExist:
+            pass
+
+    for role_name in points.keys():
+        try:
+            points_obj = Points.objects.get(value=points[role_name], project=project)
+        except Points.DoesNotExist:
+            order      = 10 + Points.objects.filter(project=project).aggregate(Max('order'))['order__max']
+            points_obj = Points.objects.create(name=str(points[role_name]), value=points[role_name], project=project)
+        try:
+            role            = Role.objects.get(name=role_name, project=project)
+            role_points, c  = RolePoints.objects.get_or_create(user_story=userstory, role=role, defaults={'points': points_obj})
+
+            role_points.points = points_obj
+            role_points.save()
+
+        except Role.DoesNotExist:
+            pass

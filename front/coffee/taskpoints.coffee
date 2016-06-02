@@ -48,7 +48,7 @@ class TaskPointsAdmin
                     project: @scope.projectId,
                     active: false
                 }
-                
+
                 if task_points_settings.length > 0
                     @scope.settings = task_points_settings[0]
                 #title = "#{@scope.sectionName} - Plugins - #{@scope.project.name}" # i18n
@@ -105,7 +105,7 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
 
     return {link:link}
 
-module = angular.module('taigaContrib.taskpoints', [])
+module = angular.module('taigaContrib.taskpoints', ['taigaContrib.userstoryTable'])
 
 module.controller("ContribTaskPointsAdminController", TaskPointsAdmin)
 module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", TaskPointsDirective])

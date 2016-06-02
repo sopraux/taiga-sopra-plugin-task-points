@@ -30,7 +30,7 @@ def connect_taiga_contrib_taskpoints_signals():
 
 def disconnect_taiga_contrib_taskpoints_signals():
     from django.db.models import signals
-    signals.pre_save.disconnect(dispatch_uid="taiga_contrib_taskpoints")
+    signals.post_save.disconnect(dispatch_uid="taiga_contrib_taskpoints")
 
 
 class TaigaContribTaskPointsAppConfig(AppConfig):

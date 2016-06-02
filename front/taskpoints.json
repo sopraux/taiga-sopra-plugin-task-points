@@ -4,6 +4,7 @@
     "description": "Include task points in Taiga.",
     "type": "admin",
     "module": "taigaContrib.taskpoints",
+    "css": "/plugins/taskpoints/taskpoints.css",
     "template": "/plugins/taskpoints/taskpoints.html",
     "js": "/plugins/taskpoints/taskpoints.js"
 }

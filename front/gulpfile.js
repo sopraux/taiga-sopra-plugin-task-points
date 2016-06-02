@@ -3,6 +3,7 @@ var $ = require('gulp-load-plugins')();
 var merge = require('merge-stream');
 
 var paths = {
+    styles: 'styles/all.scss',
     jade: 'partials/*.jade',
     coffee: 'coffee/*.coffee',
     dist: 'dist/'
@@ -37,10 +38,17 @@ gulp.task('compile', function() {
         .pipe(gulp.dest(paths.dist));
 });
 
-gulp.task('watch', function() {
-    gulp.watch([paths.jade, paths.coffee], ['compile']);
+gulp.task('compile-styles', function() {
+    return gulp.src(paths.styles)
+        .pipe($.sass({outputStyle: 'compressed'}).on('error', $.sass.logError))
+        .pipe($.concat('taskpoints.css'))
+        .pipe(gulp.dest(paths.dist));
 });
 
-gulp.task('default', ['copy-config', 'compile', 'watch']);
+gulp.task('watch', function() {
+    gulp.watch([paths.jade, paths.coffee, paths.styles], ['compile', 'compile-styles']);
+});
 
-gulp.task('build', ['copy-config', 'compile']);
+gulp.task('default', ['copy-config', 'compile', 'compile-styles', 'watch']);
+
+gulp.task('build', ['copy-config', 'compile', 'compile-styles']);
