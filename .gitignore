@@ -3,3 +3,4 @@
 *.egg-info
 back/.eggs/
 _*/
+front/node_modules/
