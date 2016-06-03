@@ -17,6 +17,8 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from taiga.projects.custom_attributes.models import TaskCustomAttributesValues
+
 
 
 class TaskPoints(models.Model):
@@ -53,3 +55,36 @@ class TaskPointsSettings(models.Model):
                                             verbose_name=_("real points index"))
     tt_index = models.IntegerField(null=True, blank=True,
                                             verbose_name=_("task type index"))
+
+
+    def get_estimated_points(self, task):
+        task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+        estimated_points = 0.0
+        ep_index = str(self.ep_index)
+
+        if ep_index in task_attributes and task_attributes[ep_index] != '':
+            estimated_points    = float( task_attributes[ep_index] )
+
+        return estimated_points
+
+
+    def get_real_points(self, task):
+        task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+        real_points      = 0.0
+        rp_index = str(self.rp_index)
+
+        if rp_index in task_attributes and task_attributes[rp_index] != '':
+            real_points         = float( task_attributes[rp_index] )
+
+        return real_points
+
+
+    def get_task_type(self, task):
+        task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
+        task_type        = ''
+        tt_index = str(self.tt_index)
+
+        if tt_index in task_attributes:
+            task_type           = task_attributes[tt_index]
+
+        return task_type

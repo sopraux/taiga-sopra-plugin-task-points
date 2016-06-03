@@ -52,39 +52,6 @@ def get_custom_attributes_index(settings):
     return index
 
 
-def get_estimated_points(task, settings):
-    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
-    estimated_points = None
-    ep_index = str(settings.ep_index)
-
-    if ep_index in task_attributes and task_attributes[ep_index] != '':
-        estimated_points    = float( task_attributes[ep_index] )
-
-    return estimated_points
-
-
-def get_real_points(task, settings):
-    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
-    real_points      = None
-    rp_index = str(settings.rp_index)
-
-    if rp_index in task_attributes and task_attributes[rp_index] != '':
-        real_points         = float( task_attributes[rp_index] )
-
-    return real_points
-
-
-def get_task_type(task, settings):
-    task_attributes  = TaskCustomAttributesValues.objects.get(task=task).attributes_values
-    task_type        = None
-    tt_index = str(settings.tt_index)
-
-    if tt_index in task_attributes:
-        task_type           = task_attributes[tt_index]
-
-    return task_type
-
-
 def create_custom_attributes_task_points(settings):
     has_ep = False
     has_rp = False
@@ -105,7 +72,7 @@ def create_custom_attributes_task_points(settings):
             has_rp = True
         elif attribute.name == TASK_TYPE:
             has_tt = True
-    #import pdb; pdb.set_trace()
+
     if not has_ep:
         TaskCustomAttribute.objects.create(project=project, name=ESTIMATED_POINTS)
     if not has_rp:
@@ -124,9 +91,9 @@ def create_custom_attributes_task_points(settings):
 
 def update_task_subject(task, settings):
 
-    estimated_points = get_estimated_points(task, settings)
-    real_points      = get_real_points(task, settings)
-    task_type        = get_task_type(task, settings)
+    estimated_points = settings.get_estimated_points(task)
+    real_points      = settings.get_real_points(task)
+    task_type        = settings.get_task_type(task)
 
     if len(task.subject.split('|')) > 1:
         task_subject = task.subject.split('|')[1]
@@ -166,6 +133,8 @@ def update_all_tasks_values(settings):
         tasks = Task.objects.filter(project=settings.project)
         for task in tasks:
             update_task_subject(task, settings)
+            update_roles(task, settings)
+            update_userstory_points(task.user_story, settings)
 
     except Task.DoesNotExist:
         pass
@@ -183,10 +152,10 @@ def clear_all_tasks_subject(settings):
 
 def update_roles(task, settings):
 
-    task_type = get_task_type(task, settings)
+    task_type = settings.get_task_type(task)
 
     if task_type == None or task_type == '':
-        task_type = 'Unnasigned'
+        task_type = 'Undefined'
     try:
         role = Role.objects.get(project=settings.project, name=task_type)
     except Role.DoesNotExist:
@@ -205,14 +174,14 @@ def update_userstory_points(userstory, settings):
     points = {}
 
     for task in tasks:
-        estimated_points = get_estimated_points(task, settings)
-        task_type        = get_task_type(task, settings)
+        estimated_points = settings.get_estimated_points(task)
+
+        task_type        = settings.get_task_type(task)
         if task_type == None or task_type == '':
-            task_type = 'Unnasigned'
+            task_type = 'Undefined'
 
         try:
             role = Role.objects.get(name=task_type, project=project)
-
             if role.name in points:
                 points[role.name] += estimated_points
             else:
