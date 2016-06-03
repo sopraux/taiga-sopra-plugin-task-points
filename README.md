@@ -1,10 +1,14 @@
-Taiga contrib bank taskpoints
+Taiga contrib taskpoints
 ===================
 
-![Kaleidos Project](http://kaleidos.net/static/img/badge.png "Kaleidos Project")
-[![Managed with Taiga.io](https://taiga.io/media/support/attachments/article-22/banner-gh.png)](https://taiga.io "Managed with Taiga.io")
 
-The Taiga plugin for bank taskpoints.
+
+The Taiga plugin for task points.
+
+
+ACTIVATION WARNING!!!!
+----------------------
+If you are using the plugin in an existing project with user story points defined, you must add manually an "estimation points" custom attribute for tasks. Then you have to divide the user story points within that user story tasks (putting them inside the estimated points custom attribute). If you don't do that, when you activate the plugin it will reset all user story points to 0!!!
 
 
 Installation

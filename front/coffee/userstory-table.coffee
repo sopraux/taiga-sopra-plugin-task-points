@@ -33,8 +33,8 @@ class UserstoryTableAdmin
     ]
 
     constructor: (@rootScope, @scope, @repo, @appMetaService, @confirm, @http) ->
-        @scope.sectionName = "Userstory table" # i18n
-        @scope.sectionSlug = "userstory table"
+        @scope.sectionName = "User Stories table" # i18n
+        @scope.sectionSlug = "user stories table"
         @scope.userstories = []
         @scope.roles = []
 
@@ -103,7 +103,7 @@ class UserstoryTableAdmin
         for k in [points_key.length-1..0] when points_key[k] isnt undefined
             remove_key = false
             for userstory, story_index in userstories
-                for point in userstory.points_value when point.key is points_key[k] and point.value isnt null
+                for point in userstory.points_value when point.key is points_key[k] and point.value isnt null and point.value > 0
                     remove_key = true
             if remove_key
                 points_key.splice(k, 1)

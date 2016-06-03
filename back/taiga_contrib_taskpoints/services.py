@@ -190,12 +190,22 @@ def update_userstory_points(userstory, settings):
         except ObjectDoesNotExist:
             pass
 
-    for role_name in points.keys():
-        try:
-            points_obj = Points.objects.get(value=points[role_name], project=project)
-        except Points.DoesNotExist:
-            order      = 10 + Points.objects.filter(project=project).aggregate(Max('order'))['order__max']
-            points_obj = Points.objects.create(name=str(points[role_name]), value=points[role_name], project=project)
+    roles = Role.objects.filter(project=project, computable=True)
+    for role in roles:
+        role_name = role.name
+
+        if role_name not in points.keys():
+            try:
+                points_obj = Points.objects.get(value=0, project=project)
+            except Points.DoesNotExist:
+                order      = 10 + Points.objects.filter(project=project).aggregate(Max('order'))['order__max']
+                points_obj = Points.objects.create(name='0', value=0, project=project)
+        else:
+            try:
+                points_obj = Points.objects.get(value=points[role_name], project=project)
+            except Points.DoesNotExist:
+                order      = 10 + Points.objects.filter(project=project).aggregate(Max('order'))['order__max']
+                points_obj = Points.objects.create(name=str(points[role_name]), value=points[role_name], project=project)
         try:
             role            = Role.objects.get(name=role_name, project=project)
             role_points, c  = RolePoints.objects.get_or_create(user_story=userstory, role=role, defaults={'points': points_obj})

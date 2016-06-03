@@ -1,47 +1,58 @@
-.basic-table.userstory-table {
-    display: table;
-    margin-top: 50px;
-    border-collapse: collapse;
-    border: 1px solid darkgrey;
-    .table-header {
-        border-bottom: 1px solid black;
-        background-color: silver;
-        font-size: 20px;
-        &.row {
-            height: 50px;
-        }
+.userstory-table {
+    .check-item {
+        display: inline-block;
     }
-    .table-body {
-        @include last(2) {
-            border-bottom: 1px solid black;
-        }
+    fieldset {
+        margin-bottom: 2rem;
     }
-    .table-footer {
-        font-size: 16px;
-    }
-    .row {
-        width: 100%;
-        display: table-row;
-        height: 35px;
-        @include even {
-            background-color: lightgrey;
-        }
 
-        div {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            padding-left: 20px;
-            padding-right: 20px;
-            @include first(1) {
-                text-align: left;
+    .basic-table {
+        display: table;
+        margin-top: 50px;
+        border-collapse: collapse;
+        border: 1px solid darkgrey;
+
+        .table-header {
+            border-bottom: 1px solid black;
+            background-color: silver;
+            font-size: 20px;
+            &.row {
+                height: 50px;
             }
-            @include last(1) {
-                border-left: 1px solid black;
+        }
+        .table-body {
+            @include last(2) {
+                border-bottom: 1px solid black;
+            }
+        }
+        .table-footer {
+            font-size: 16px;
+        }
+        .row {
+            width: 100%;
+            display: table-row;
+            height: 35px;
+            @include even {
+                background-color: lightgrey;
+            }
+
+            div {
+                display: table-cell;
+                vertical-align: middle;
+                text-align: center;
+                padding-left: 20px;
+                padding-right: 20px;
+                @include first(1) {
+                    text-align: left;
+                }
+                @include last(1) {
+                    border-left: 1px solid black;
+                }
             }
         }
     }
 }
+
 
 .admin-contrib form {
     max-width: 100%;

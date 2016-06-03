@@ -1,4 +1,4 @@
-div(contrib-userstory-table, ng-controller="ContribUserstoryTableAdminController as ctrl")
+div.userstory-table(contrib-userstory-table, ng-controller="ContribUserstoryTableAdminController as ctrl")
     header
         h1
             span.project-name {{::project.name}}
@@ -6,13 +6,12 @@ div(contrib-userstory-table, ng-controller="ContribUserstoryTableAdminController
 
     form
         fieldset
-            div.check-item
-                span Select Sprint
-                div.contrib-form-wrapper
-                    select(
-                        ng-options="milestone as milestone.name for milestone in milestones track by milestone.id"
-                        ng-model="selected"
-                    )
+            label Select Sprint
+            div.contrib-form-wrapper
+                select(
+                    ng-options="milestone as milestone.name for milestone in milestones track by milestone.id"
+                    ng-model="selected"
+                )
             
 
         button.button-green.submit-button(
@@ -20,7 +19,7 @@ div(contrib-userstory-table, ng-controller="ContribUserstoryTableAdminController
             title="Generate Table"
         ) Generate Table
             
-        div.basic-table.userstory-table(ng-hide="userstories.length < 1")
+        div.basic-table(ng-hide="userstories.length < 1")
             div.table-header.row
                 div Userstory
                 div(

@@ -1,4 +1,4 @@
-div(contrib-task-points, ng-controller="ContribTaskPointsAdminController as ctrl")
+div.task-points(contrib-task-points, ng-controller="ContribTaskPointsAdminController as ctrl")
     header
         h1
             span.project-name {{::project.name}}
@@ -6,13 +6,6 @@ div(contrib-task-points, ng-controller="ContribTaskPointsAdminController as ctrl
 
     form
         fieldset
-            div.check-item
-                span Activate Plugin
-                div.check
-                    input(type="checkbox" name="active" ng-model="settings.active")
-                    div
-                    span.check-text.check-yes(translate="COMMON.YES")
-                    span.check-text.check-no(translate="COMMON.NO")
 
             label(for="ep_name") Estimated Points custom name
             div.contrib-form-wrapper
@@ -45,11 +38,14 @@ div(contrib-task-points, ng-controller="ContribTaskPointsAdminController as ctrl
                         id="tt_name"
                     )
 
-
-        button.button-green.submit-button(
+        
+        input.submit-button(
             type="submit"
-            title="{{'COMMON.SAVE' | translate}}"
-            translate="COMMON.SAVE"
-        )
+            title="settings.active ? 'Deactivate Plugin' : 'Activate Plugin'"
+            ng-class="{'button-green': !settings.active, 'button-red': settings.active}"
+            ng-value="settings.active ? 'Deactivate Plugin' : 'Activate Plugin'"
+        ) 
+        
+        
 
 include userstory-table.jade

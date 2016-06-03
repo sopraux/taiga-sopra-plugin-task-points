@@ -74,6 +74,7 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
                 .target(submitButton)
                 .start()
 
+            $scope.settings.active = !$scope.settings.active
 
             if not $scope.settings.id
                 promise = $repo.create("taskpoints_settings", $scope.settings)
@@ -89,6 +90,8 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
                     TaskPointsAdmin.prototype.activate($http, $repo, $scope)
                 else if $scope.settings.id
                     TaskPointsAdmin.prototype.deactivate($http, $repo, $scope)
+
+
                 currentLoading.finish()
                 $confirm.notify("success")
 
@@ -97,6 +100,8 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls) ->
                 form.setErrors(data)
                 if data._error_message
                     $confirm.notify("error", data._error_message)
+
+            $scope.settings.active
 
         submitButton = $el.find(".submit-button")
 

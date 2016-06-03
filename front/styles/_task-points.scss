@@ -1,0 +1,9 @@
+.task-points {
+    margin-bottom: 50px;
+    fieldset {
+        border-bottom: 0;
+    }
+    .submit-button:focus {
+        outline: none;
+    }
+}
