@@ -12,6 +12,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = (1, 0, 1)
+__version__ = (1, 0, 2)
 
 default_app_config = "taiga_contrib_taskpoints.apps.TaigaContribTaskPointsAppConfig"

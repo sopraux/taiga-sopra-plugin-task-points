@@ -18,16 +18,16 @@ from django.utils import timezone
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 
-from taiga.projects.custom_attributes.models import TaskCustomAttribute, TaskCustomAttributesValues
+from taiga.projects.custom_attributes.models import TaskCustomAttribute
 from taiga.projects.tasks.models import Task
 from taiga.projects.userstories.models import RolePoints
 from taiga.projects.models import Points
 from taiga.users.models import Role
-from .models import TaskPoints, TaskPointsSettings
 
 import datetime
+import re
 
-
+# @param settings: TaskPointsSettings Object
 def get_custom_attributes_index(settings):
     index = {}
 
@@ -52,6 +52,7 @@ def get_custom_attributes_index(settings):
     return index
 
 
+# @param settings: TaskPointsSettings Object
 def create_custom_attributes_task_points(settings):
     has_ep = False
     has_rp = False
@@ -89,45 +90,46 @@ def create_custom_attributes_task_points(settings):
     settings.save()
 
 
+# @param settings: TaskPointsSettings Object
 def update_task_subject(task, settings):
 
     estimated_points = settings.get_estimated_points(task)
     real_points      = settings.get_real_points(task)
     task_type        = settings.get_task_type(task)
-
-    if len(task.subject.split('|')) > 1:
-        task_subject = task.subject.split('|')[1]
-    else:
-        task_subject = task.subject
-
-    subject = ''
-
-    if estimated_points != None and estimated_points > 0:
-        subject += '(' + str(estimated_points) + ') '
-    if real_points != None and real_points > 0:
-        subject += '[' + str(real_points) + '] '
-    if task_type != None and task_type != '':
-        subject += task_type
-    if estimated_points != None or real_points != None or task_type != None:
-        subject += ' | '
+    points           = ''
+    ep_text          = '(' + str(estimated_points) + ') '
+    rp_text          = '[' + str(real_points) + '] '
 
 
-    task.subject = subject + task_subject   #Adds the custom attributes to the task subject (title)
+    task_subject = remove_points_from_text(task.subject)
+
+    if estimated_points > 0:
+        points += ep_text
+    if real_points > 0:
+        points += rp_text
+
+    task.subject = points + task_subject     #Adds the custom attributes to the task subject (title)
 
     task.save(update_fields=['subject'])
 
 
+def remove_points_from_text(text):
+    task_subject = text
+    ep_pattern   = r'\([^)]*\)\s*'
+    rp_pattern   = r'\[[^\]]*\]\s*'
+
+    task_subject = re.sub(ep_pattern, '', task_subject, 1)
+    task_subject = re.sub(rp_pattern, '', task_subject, 1)
+    return task_subject
+
+
 def clear_task_subject(task):
-
-    if len(task.subject.split('|')) > 1:
-        task_subject = task.subject.split('|')[1]
-    else:
-        task_subject = task.subject
-
+    task_subject = remove_points_from_text(task.subject)
     task.subject = task_subject
     task.save(update_fields=['subject'])
 
 
+# @param settings: TaskPointsSettings Object
 def update_all_tasks_values(settings):
     try:
         tasks = Task.objects.filter(project=settings.project)
@@ -140,6 +142,7 @@ def update_all_tasks_values(settings):
         pass
 
 
+# @param settings: TaskPointsSettings Object
 def clear_all_tasks_subject(settings):
     try:
         tasks = Task.objects.filter(project=settings.project)
@@ -150,6 +153,7 @@ def clear_all_tasks_subject(settings):
         pass
 
 
+# @param settings: TaskPointsSettings Object
 def update_roles(task, settings):
 
     task_type = settings.get_task_type(task)
@@ -168,6 +172,7 @@ def update_roles(task, settings):
         )
 
 
+# @param settings: TaskPointsSettings Object
 def update_userstory_points(userstory, settings):
     project = settings.project
     tasks = Task.objects.filter(user_story=userstory)
