@@ -1,4 +1,5 @@
-# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2016 Sopra Steria
+# Copyright (C) 2016 David Peris <david.peris92@gmail.com>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
@@ -12,6 +13,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = (1, 0, 2)
+__version__ = (1, 1, 0)
 
 default_app_config = "taiga_contrib_taskpoints.apps.TaigaContribTaskPointsAppConfig"
