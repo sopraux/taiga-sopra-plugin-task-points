@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 
-from taiga.projects.custom_attributes.models import TaskCustomAttribute
+from taiga.projects.custom_attributes.models import TaskCustomAttribute, TaskCustomAttributesValues
 from taiga.projects.tasks.models import Task
 from taiga.projects.userstories.models import RolePoints
 from taiga.projects.models import Points
@@ -112,6 +112,26 @@ def update_task_subject(task, settings):
     task.save(update_fields=['subject'])
 
 
+def update_task_points_from_subject(task, settings):
+    ep_pattern = r'\(\d+\.*\d*\)'
+    points     = re.search(ep_pattern, task.subject)
+    if points != None:
+        try:
+            points = float(points.group(0).strip('()'))
+        except ValueError:
+            points = 0
+    else:
+        points = 0
+
+    task_attributes  = TaskCustomAttributesValues.objects.get(task=task)
+    values           = task_attributes.attributes_values
+    ep_index         = str(settings.ep_index)
+    if points > 0:
+        values[ep_index] = points
+        task_attributes.attributes_values = values
+        task_attributes.save(update_fields=['attributes_values'])
+
+
 def remove_points_from_text(text):
     task_subject = text
     ep_pattern   = r'\([^)]*\)\s*'
@@ -129,11 +149,14 @@ def clear_task_subject(task):
 
 
 # @param settings: TaskPointsSettings Object
-def update_all_tasks_values(settings):
+def update_all_tasks(settings):
     try:
         tasks = Task.objects.filter(project=settings.project)
         for task in tasks:
-            update_task_subject(task, settings)
+            if settings.get_estimated_points(task) > 0:
+                update_task_subject(task, settings)
+            else:
+                update_task_points_from_subject(task, settings)
             update_roles(task, settings)
             update_userstory_points(task.user_story, settings)
 

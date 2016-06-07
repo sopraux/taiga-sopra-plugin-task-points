@@ -1,12 +1,8 @@
 {
   "name": "taiga-contrib-taskpoints",
-  "version": "0.0.2",
-  "description": "Taiga contrib plugin for btask points",
+  "version": "1.1.0",
+  "description": "Taiga contrib plugin for task points",
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/taigaio/taiga-contrib-taskpoints"
-  },
   "keywords": [
     "task",
     "points",
@@ -15,10 +11,6 @@
   ],
   "author": "David Peris <david.peris92@gmail.com>",
   "license": "AGPL-3.0",
-  "bugs": {
-    "url": "https://github.com/taigaio/taiga-contrib-taskpoints/issues"
-  },
-  "homepage": "https://github.com/taigaio/taiga-contrib-taskpoints",
   "dependencies": {
     "coffee-script": "^1.8.0",
     "jade": "^1.9.1"
