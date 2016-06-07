@@ -96,37 +96,37 @@ class UserstoryTableAdmin
         points_key = roles.map( (rol) -> rol.id.toString() ) # relation between roles and points
 
         # splice roles not computable
-        for r in [roles.length-1..0] when roles[r] isnt undefined and roles[r].computable is false
+        for r in [roles.length-1..0] when roles[r]? and not roles[r].computable
             roles.splice(r, 1)
 
         # splice roles which have not points
-        for k in [points_key.length-1..0] when points_key[k] isnt undefined
+        for k in [points_key.length-1..0] when points_key[k]?
             remove_key = false
             for userstory, story_index in userstories
-                for point in userstory.points_value when point.key is points_key[k] and point.value isnt null and point.value > 0
+                for point in userstory.points_value when point.key is points_key[k] and point.value? and point.value > 0
                     remove_key = true
             if remove_key
                 points_key.splice(k, 1)
 
         for key in points_key
-            for r in [roles.length-1..0] when roles[r] isnt undefined and roles[r].id is parseInt(key)
+            for r in [roles.length-1..0] when roles[r]? and roles[r].id is parseInt(key)
                 roles.splice(r, 1)
             for userstory, story_index in userstories
                 points = userstory.points_value
-                for p in [points.length-1..0] when points[p] isnt undefined and points[p].key is key
+                for p in [points.length-1..0] when points[p]? and points[p].key is key
                     userstories[story_index].points_value.splice(p, 1)
 
 
     get_column_total_points: (userstories) ->
         totals = []
         for point in userstories[0].points_value
-            if point.value isnt null then value = point.value
+            if point.value? then value = point.value
             else value = 0
             totals.push({ key: point.key, value: value })
 
         for u in [1..userstories.length-1]
             for point in userstories[u].points_value
-                for total, t in totals when total.key is point.key and point.value isnt null
+                for total, t in totals when total.key is point.key and point.value?
                     totals[t].value += point.value
         return totals
 

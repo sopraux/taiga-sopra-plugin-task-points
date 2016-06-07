@@ -1,3 +1,144 @@
+angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("/plugins/taskpoints/taskpoints.html","\n<div contrib-task-points=\"contrib-task-points\" ng-controller=\"ContribTaskPointsAdminController as ctrl\" class=\"task-points\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label for=\"ep_name\">Estimated Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"ep_name\" ng-model=\"settings.ep_name\" placeholder=\"Estimated Points\" id=\"ep_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"rp_name\">Real Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"rp_name\" ng-model=\"settings.rp_name\" placeholder=\"Real Points\" id=\"rp_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"tt_name\">Task Type custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"tt_name\" ng-model=\"settings.tt_name\" placeholder=\"Type\" id=\"tt_name\"/>\n        </fieldset>\n      </div>\n    </fieldset>\n    <input type=\"submit\" title=\"settings.active ? \'Deactivate Plugin\' : \'Activate Plugin\'\" ng-class=\"{\'button-green\': !settings.active, \'button-red\': settings.active}\" ng-value=\"settings.active ? \'Deactivate Plugin\' : \'Activate Plugin\'\" class=\"submit-button\"/>\n  </form>\n</div>\n<div contrib-userstory-table=\"contrib-userstory-table\" ng-controller=\"ContribUserstoryTableAdminController as ctrl\" class=\"userstory-table\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label>Select Sprint</label>\n      <div class=\"contrib-form-wrapper\">\n        <select ng-options=\"milestone as milestone.name for milestone in milestones track by milestone.id\" ng-model=\"selected\"></select>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"Generate Table\" class=\"button-green submit-button\">Generate Table</button>\n    <div ng-hide=\"userstories.length &lt; 1\" class=\"basic-table\">\n      <div class=\"table-header row\">\n        <div>Userstory</div>\n        <div ng-repeat=\"role in roles | orderBy: id\">{{ role.name }}</div>\n        <div>Total</div>\n      </div>\n      <div ng-repeat=\"userstory in userstories\" class=\"table-body row\">\n        <div>{{ userstory.subject }}              </div>\n        <div ng-repeat=\"point in userstory.points_value | orderBy: key\">{{ point.value }}</div>\n        <div>{{ userstory.total_points }}</div>\n      </div>\n      <div class=\"table-footer row\">\n        <div>Total</div>\n        <div ng-repeat=\"total in column_totals | orderBy: key\">{{ total.value }}</div>\n        <div>{{ total_points }}</div>\n      </div>\n    </div>\n  </form>\n</div>");
+$templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-userstory-table=\"contrib-userstory-table\" ng-controller=\"ContribUserstoryTableAdminController as ctrl\" class=\"userstory-table\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label>Select Sprint</label>\n      <div class=\"contrib-form-wrapper\">\n        <select ng-options=\"milestone as milestone.name for milestone in milestones track by milestone.id\" ng-model=\"selected\"></select>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"Generate Table\" class=\"button-green submit-button\">Generate Table</button>\n    <div ng-hide=\"userstories.length &lt; 1\" class=\"basic-table\">\n      <div class=\"table-header row\">\n        <div>Userstory</div>\n        <div ng-repeat=\"role in roles | orderBy: id\">{{ role.name }}</div>\n        <div>Total</div>\n      </div>\n      <div ng-repeat=\"userstory in userstories\" class=\"table-body row\">\n        <div>{{ userstory.subject }}              </div>\n        <div ng-repeat=\"point in userstory.points_value | orderBy: key\">{{ point.value }}</div>\n        <div>{{ userstory.total_points }}</div>\n      </div>\n      <div class=\"table-footer row\">\n        <div>Total</div>\n        <div ng-repeat=\"total in column_totals | orderBy: key\">{{ total.value }}</div>\n        <div>{{ total_points }}</div>\n      </div>\n    </div>\n  </form>\n</div>");}]);
+(function() {
+  var module, serviceProvider;
+
+  serviceProvider = function($repo, $http) {
+    var service;
+    service = {};
+    service.activate = function(settings) {
+      return $http.post($repo.resolveUrlForModel(settings) + '/activate');
+    };
+    service.deactivate = function(settings) {
+      return $http.post($repo.resolveUrlForModel(settings) + '/deactivate');
+    };
+    return service;
+  };
+
+  module = angular.module("taigaContrib.services", []);
+
+  module.factory("activationService", ["$tgRepo", "$tgHttp", serviceProvider]);
+
+}).call(this);
+
+
+/*
+ * Copyright (C) 2016 Sopra Steria
+ * Copyright (C) 2016 David Peris <david.peris92@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * File: task-burndown.coffee
+ */
+
+(function() {
+  var TaskBurndownAdmin, TaskBurndownDirective, debounce, module;
+
+  debounce = function(wait, func) {
+    return _.debounce(func, wait, {
+      leading: true,
+      trailing: false
+    });
+  };
+
+  TaskBurndownAdmin = (function() {
+    TaskBurndownAdmin.$inject = ["$rootScope", "$scope", "$tgRepo", "tgAppMetaService", "$tgConfirm", "$tgHttp", "$tgUrls"];
+
+    function TaskBurndownAdmin(rootScope, scope, repo, appMetaService, confirm, http) {
+      this.rootScope = rootScope;
+      this.scope = scope;
+      this.repo = repo;
+      this.appMetaService = appMetaService;
+      this.confirm = confirm;
+      this.http = http;
+      this.scope.sectionName = "Task burndown";
+      this.scope.sectionSlug = "task burndown";
+      this.scope.$on("project:loaded", (function(_this) {
+        return function() {
+          var TableAdmin, promise;
+          TableAdmin = UserstoryTableAdmin.prototype;
+          promise = _this.repo.queryMany("milestones", {
+            project: _this.scope.projectId
+          });
+          return promise.then(function(project_milestones) {
+            _this.scope.milestones = project_milestones;
+            return _this.scope.selected = TableAdmin.get_present_milestone(project_milestones);
+          });
+        };
+      })(this));
+    }
+
+    return TaskBurndownAdmin;
+
+  })();
+
+  TaskBurndownDirective = function($repo, $confirm, $loading, $http, $urls) {
+    var link;
+    link = function($scope, $el, $attrs) {
+      var form, submit, submitButton;
+      form = $el.find("form").checksley({
+        "onlyOneErrorElement": true
+      });
+      submit = debounce(2000, (function(_this) {
+        return function(event) {
+          var currentLoading, promise;
+          event.preventDefault();
+          if (!form.validate()) {
+            return;
+          }
+          currentLoading = $loading().target(submitButton).start();
+          $scope.settings.active = !$scope.settings.active;
+          if (!$scope.settings.id) {
+            promise = $repo.create("taskpoints_settings", $scope.settings);
+            promise.then(function(data) {
+              return $scope.settings = data;
+            });
+          } else {
+            promise = $repo.save($scope.settings);
+            promise.then(function(data) {
+              return $scope.settings = data;
+            });
+            currentLoading.finish();
+            $confirm.notify("success");
+          }
+          promise.then(null, function(data) {
+            currentLoading.finish();
+            form.setErrors(data);
+            if (data._error_message) {
+              return $confirm.notify("error", data._error_message);
+            }
+          });
+          return $scope.settings.active;
+        };
+      })(this));
+      submitButton = $el.find(".submit-button");
+      $el.on("submit", "form", submit);
+      return $el.on("click", ".submit-button", submit);
+    };
+    return {
+      link: link
+    };
+  };
+
+  module = angular.module('taigaContrib.taskBurndown', []);
+
+  module.controller("ContribTaskBurndownAdminController", TaskBurndownAdmin);
+
+  module.directive("contribTaskBurndown", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", TaskBurndownDirective]);
+
+}).call(this);
+
 
 /*
  * Copyright (C) 2016 Sopra Steria
@@ -60,25 +201,11 @@
       })(this));
     }
 
-    TaskPointsAdmin.prototype.activate = function(http, repo, scope) {
-      this.http = http;
-      this.repo = repo;
-      this.scope = scope;
-      return this.http.post(this.repo.resolveUrlForModel(this.scope.settings) + '/activate');
-    };
-
-    TaskPointsAdmin.prototype.deactivate = function(http, repo, scope) {
-      this.http = http;
-      this.repo = repo;
-      this.scope = scope;
-      return this.http.post(this.repo.resolveUrlForModel(this.scope.settings) + '/deactivate');
-    };
-
     return TaskPointsAdmin;
 
   })();
 
-  TaskPointsDirective = function($repo, $confirm, $loading, $http, $urls) {
+  TaskPointsDirective = function($repo, $confirm, $loading, $http, $urls, service) {
     var link;
     link = function($scope, $el, $attrs) {
       var form, submit, submitButton;
@@ -107,9 +234,9 @@
           }
           promise.then(function(data) {
             if ($scope.settings.active) {
-              TaskPointsAdmin.prototype.activate($http, $repo, $scope);
+              service.activate($scope.settings);
             } else if ($scope.settings.id) {
-              TaskPointsAdmin.prototype.deactivate($http, $repo, $scope);
+              service.deactivate($scope.settings);
             }
             currentLoading.finish();
             return $confirm.notify("success");
@@ -133,11 +260,11 @@
     };
   };
 
-  module = angular.module('taigaContrib.taskpoints', ['taigaContrib.userstoryTable']);
+  module = angular.module('taigaContrib.taskpoints', ['taigaContrib.userstoryTable', 'taigaContrib.services']);
 
   module.controller("ContribTaskPointsAdminController", TaskPointsAdmin);
 
-  module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", TaskPointsDirective]);
+  module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", "activationService", TaskPointsDirective]);
 
   initTaskPointsPlugin = function($tgUrls) {
     return $tgUrls.update({
@@ -289,12 +416,12 @@
         return rol.id.toString();
       });
       for (r = i = ref = roles.length - 1; ref <= 0 ? i <= 0 : i >= 0; r = ref <= 0 ? ++i : --i) {
-        if (roles[r] !== void 0 && roles[r].computable === false) {
+        if ((roles[r] != null) && !roles[r].computable) {
           roles.splice(r, 1);
         }
       }
       for (k = j = ref1 = points_key.length - 1; ref1 <= 0 ? j <= 0 : j >= 0; k = ref1 <= 0 ? ++j : --j) {
-        if (!(points_key[k] !== void 0)) {
+        if (!(points_key[k] != null)) {
           continue;
         }
         remove_key = false;
@@ -303,7 +430,7 @@
           ref2 = userstory.points_value;
           for (m = 0, len1 = ref2.length; m < len1; m++) {
             point = ref2[m];
-            if (point.key === points_key[k] && point.value !== null && point.value > 0) {
+            if (point.key === points_key[k] && (point.value != null) && point.value > 0) {
               remove_key = true;
             }
           }
@@ -316,7 +443,7 @@
       for (n = 0, len2 = points_key.length; n < len2; n++) {
         key = points_key[n];
         for (r = o = ref3 = roles.length - 1; ref3 <= 0 ? o <= 0 : o >= 0; r = ref3 <= 0 ? ++o : --o) {
-          if (roles[r] !== void 0 && roles[r].id === parseInt(key)) {
+          if ((roles[r] != null) && roles[r].id === parseInt(key)) {
             roles.splice(r, 1);
           }
         }
@@ -330,7 +457,7 @@
               var ref4, results2, s;
               results2 = [];
               for (p = s = ref4 = points.length - 1; ref4 <= 0 ? s <= 0 : s >= 0; p = ref4 <= 0 ? ++s : --s) {
-                if (points[p] !== void 0 && points[p].key === key) {
+                if ((points[p] != null) && points[p].key === key) {
                   results2.push(userstories[story_index].points_value.splice(p, 1));
                 }
               }
@@ -349,7 +476,7 @@
       ref = userstories[0].points_value;
       for (i = 0, len = ref.length; i < len; i++) {
         point = ref[i];
-        if (point.value !== null) {
+        if (point.value != null) {
           value = point.value;
         } else {
           value = 0;
@@ -365,7 +492,7 @@
           point = ref2[l];
           for (t = m = 0, len2 = totals.length; m < len2; t = ++m) {
             total = totals[t];
-            if (total.key === point.key && point.value !== null) {
+            if (total.key === point.key && (point.value != null)) {
               totals[t].value += point.value;
             }
           }
@@ -454,6 +581,3 @@
   module.run(["$tgUrls", initUserstoryTablePlugin]);
 
 }).call(this);
-
-angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("/plugins/taskpoints/taskpoints.html","\n<div contrib-task-points=\"contrib-task-points\" ng-controller=\"ContribTaskPointsAdminController as ctrl\" class=\"task-points\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label for=\"ep_name\">Estimated Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"ep_name\" ng-model=\"settings.ep_name\" placeholder=\"Estimated Points\" id=\"ep_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"rp_name\">Real Points custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"rp_name\" ng-model=\"settings.rp_name\" placeholder=\"Real Points\" id=\"rp_name\"/>\n        </fieldset>\n      </div>\n      <label for=\"tt_name\">Task Type custom name</label>\n      <div class=\"contrib-form-wrapper\">\n        <fieldset class=\"contrib-input\">\n          <input type=\"text\" name=\"tt_name\" ng-model=\"settings.tt_name\" placeholder=\"Type\" id=\"tt_name\"/>\n        </fieldset>\n      </div>\n    </fieldset>\n    <input type=\"submit\" title=\"settings.active ? \'Deactivate Plugin\' : \'Activate Plugin\'\" ng-class=\"{\'button-green\': !settings.active, \'button-red\': settings.active}\" ng-value=\"settings.active ? \'Deactivate Plugin\' : \'Activate Plugin\'\" class=\"submit-button\"/>\n  </form>\n</div>\n<div contrib-userstory-table=\"contrib-userstory-table\" ng-controller=\"ContribUserstoryTableAdminController as ctrl\" class=\"userstory-table\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label>Select Sprint</label>\n      <div class=\"contrib-form-wrapper\">\n        <select ng-options=\"milestone as milestone.name for milestone in milestones track by milestone.id\" ng-model=\"selected\"></select>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"Generate Table\" class=\"button-green submit-button\">Generate Table</button>\n    <div ng-hide=\"userstories.length &lt; 1\" class=\"basic-table\">\n      <div class=\"table-header row\">\n        <div>Userstory</div>\n        <div ng-repeat=\"role in roles | orderBy: id\">{{ role.name }}</div>\n        <div>Total</div>\n      </div>\n      <div ng-repeat=\"userstory in userstories\" class=\"table-body row\">\n        <div>{{ userstory.subject }}              </div>\n        <div ng-repeat=\"point in userstory.points_value | orderBy: key\">{{ point.value }}</div>\n        <div>{{ userstory.total_points }}</div>\n      </div>\n      <div class=\"table-footer row\">\n        <div>Total</div>\n        <div ng-repeat=\"total in column_totals | orderBy: key\">{{ total.value }}</div>\n        <div>{{ total_points }}</div>\n      </div>\n    </div>\n  </form>\n</div>");
-$templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-userstory-table=\"contrib-userstory-table\" ng-controller=\"ContribUserstoryTableAdminController as ctrl\" class=\"userstory-table\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label>Select Sprint</label>\n      <div class=\"contrib-form-wrapper\">\n        <select ng-options=\"milestone as milestone.name for milestone in milestones track by milestone.id\" ng-model=\"selected\"></select>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"Generate Table\" class=\"button-green submit-button\">Generate Table</button>\n    <div ng-hide=\"userstories.length &lt; 1\" class=\"basic-table\">\n      <div class=\"table-header row\">\n        <div>Userstory</div>\n        <div ng-repeat=\"role in roles | orderBy: id\">{{ role.name }}</div>\n        <div>Total</div>\n      </div>\n      <div ng-repeat=\"userstory in userstories\" class=\"table-body row\">\n        <div>{{ userstory.subject }}              </div>\n        <div ng-repeat=\"point in userstory.points_value | orderBy: key\">{{ point.value }}</div>\n        <div>{{ userstory.total_points }}</div>\n      </div>\n      <div class=\"table-footer row\">\n        <div>Total</div>\n        <div ng-repeat=\"total in column_totals | orderBy: key\">{{ total.value }}</div>\n        <div>{{ total_points }}</div>\n      </div>\n    </div>\n  </form>\n</div>");}]);

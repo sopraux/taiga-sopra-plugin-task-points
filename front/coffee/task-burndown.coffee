@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-# File: taskpoints.coffee
+# File: task-burndown.coffee
 ###
 debounce = (wait, func) ->
     return _.debounce(func, wait, {leading: true, trailing: false})
 
 
-class TaskPointsAdmin
+class TaskBurndownAdmin
     @.$inject = [
         "$rootScope",
         "$scope",
@@ -33,26 +33,24 @@ class TaskPointsAdmin
     ]
 
     constructor: (@rootScope, @scope, @repo, @appMetaService, @confirm, @http) ->
-        @scope.sectionName = "Task points" # i18n
-        @scope.sectionSlug = "task points"
+        @scope.sectionName = "Task burndown" # i18n
+        @scope.sectionSlug = "task burndown"
 
         @scope.$on "project:loaded", =>
-            promise = @repo.queryMany("taskpoints_settings", {project: @scope.projectId})
+            TableAdmin = UserstoryTableAdmin.prototype
+            promise = @repo.queryMany("milestones", {project: @scope.projectId})
 
-            promise.then (task_points_settings) =>
-                @scope.settings = {
-                    project: @scope.projectId,
-                    active: false
-                }
+            promise.then (project_milestones) =>
+                @scope.milestones = project_milestones
 
-                if task_points_settings.length > 0
-                    @scope.settings = task_points_settings[0]
-                #title = "#{@scope.sectionName} - Plugins - #{@scope.project.name}" # i18n
-                #description = @scope.project.description
-            #@appMetaService.setAll(title, description)
+                @scope.selected = TableAdmin.get_present_milestone project_milestones
 
 
-TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls, service) ->
+
+
+
+
+TaskBurndownDirective = ($repo, $confirm, $loading, $http, $urls) ->
     link = ($scope, $el, $attrs) ->
         form = $el.find("form").checksley({"onlyOneErrorElement": true})
         submit = debounce 2000, (event) =>
@@ -75,12 +73,6 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls, service) ->
                 promise.then (data) ->
                     $scope.settings = data
 
-            promise.then (data)->
-                if $scope.settings.active
-                    service.activate($scope.settings)
-                else if $scope.settings.id
-                    service.deactivate($scope.settings)
-
 
                 currentLoading.finish()
                 $confirm.notify("success")
@@ -100,14 +92,7 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls, service) ->
 
     return {link:link}
 
-module = angular.module('taigaContrib.taskpoints', ['taigaContrib.userstoryTable', 'taigaContrib.services'])
+module = angular.module('taigaContrib.taskBurndown', [])
 
-module.controller("ContribTaskPointsAdminController", TaskPointsAdmin)
-module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", "activationService", TaskPointsDirective])
-
-initTaskPointsPlugin = ($tgUrls) ->
-    $tgUrls.update({
-        "taskpoints": "/taskpoints",
-        "taskpoints_settings": "/taskpoints_settings"
-    })
-module.run(["$tgUrls", initTaskPointsPlugin])
+module.controller("ContribTaskBurndownAdminController", TaskBurndownAdmin)
+module.directive("contribTaskBurndown", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", TaskBurndownDirective])
