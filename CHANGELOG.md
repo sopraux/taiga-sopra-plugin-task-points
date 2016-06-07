@@ -1,5 +1,8 @@
 # Changelog #
 
+## 1.2.0 (2016-06-07)
+- Removed auto initialization of task points
+
 ## 1.1.0 (2016-06-07)
 - Now takes points from the task subject at plugin initialization
 
