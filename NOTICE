@@ -1,8 +1,17 @@
-This product is licensed to you under the GNU Affero General Public License,
-Version 3 (the "License"). You may not use this product except in compliance
-with the License.
+Taiga-contrib-taskpoints is a taiga plugin for manage taskpoints.
 
-This product may include a number of subcomponents with
-separate copyright notices and license terms. Your use of the source
-code for the these subcomponents is subject to the terms and
-conditions of the subcomponent's license.
+Copyright 2016 by Sopra Steria
+Copyright 2016 by David Peris <david.peris92@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.

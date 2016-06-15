@@ -38,7 +38,7 @@ Then run the migrations to generate the new need table:
 
 #### Taiga Front
 
-Download in your `dist/plugins/` directory of Taiga front the `taiga-contrib-taskpoints` compiled code (you need subversion in your system):
+Download in your `dist/plugins/` directory of Taiga front the `taiga-contrib-taskpoints` compiled code:
 
 ```bash
   cd taiga-front-dist/dist
