@@ -1,6 +1,6 @@
 {
   "name": "taiga-contrib-taskpoints",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Taiga contrib plugin for task points",
   "main": "index.js",
   "keywords": [
@@ -10,7 +10,7 @@
     "include"
   ],
   "author": "David Peris <david.peris92@gmail.com>",
-  "license": "AGPL-3.0",
+  "license": "AGPLv3",
   "dependencies": {
     "coffee-script": "^1.8.0",
     "jade": "^1.9.1"

@@ -2,23 +2,23 @@ angular.module("templates").run(["$templateCache", function($templateCache) {$te
 $templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-userstory-table=\"contrib-userstory-table\" ng-controller=\"ContribUserstoryTableAdminController as ctrl\" class=\"userstory-table\">\n  <header>\n    <h1><span class=\"project-name\">{{::project.name}}</span><span class=\"green\">{{::sectionName}}</span></h1>\n  </header>\n  <form>\n    <fieldset>\n      <label>Select Sprint</label>\n      <div class=\"contrib-form-wrapper\">\n        <select ng-options=\"milestone as milestone.name for milestone in milestones track by milestone.id\" ng-model=\"selected\"></select>\n      </div>\n    </fieldset>\n    <button type=\"submit\" title=\"Generate Table\" class=\"button-green submit-button\">Generate Table</button>\n    <div ng-hide=\"userstories.length &lt; 1\" class=\"basic-table\">\n      <div class=\"table-header row\">\n        <div>Userstory</div>\n        <div ng-repeat=\"role in roles | orderBy: id\">{{ role.name }}</div>\n        <div>Total</div>\n      </div>\n      <div ng-repeat=\"userstory in userstories\" class=\"table-body row\">\n        <div>{{ userstory.subject }}              </div>\n        <div ng-repeat=\"point in userstory.points_value | orderBy: key\">{{ point.value }}</div>\n        <div>{{ userstory.total_points }}</div>\n      </div>\n      <div class=\"table-footer row\">\n        <div>Total</div>\n        <div ng-repeat=\"total in column_totals | orderBy: key\">{{ total.value }}</div>\n        <div>{{ total_points }}</div>\n      </div>\n    </div>\n  </form>\n</div>");}]);
 
 /*
- * Copyright (C) 2016 Sopra Steria
- * Copyright (C) 2016 David Peris <david.peris92@gmail.com>
+ *  Taiga-contrib-taskpoints is a taiga plugin for manage taskpoints.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ *  Copyright 2016 by Sopra Steria
+ *  Copyright 2016 by David Peris <david.peris92@gmail.com>
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU Affero General Public License as
+ *    published by the Free Software Foundation, either version 3 of the
+ *    License, or (at your option) any later version.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Affero General Public License for more details.
  *
- * File: taskpoints.coffee
+ *    You should have received a copy of the GNU Affero General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function() {
@@ -154,23 +154,23 @@ $templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-us
 
 
 /*
- * Copyright (C) 2016 Sopra Steria
- * Copyright (C) 2016 David Peris <david.peris92@gmail.com>
+ *  Taiga-contrib-taskpoints is a taiga plugin for manage taskpoints.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ *  Copyright 2016 by Sopra Steria
+ *  Copyright 2016 by David Peris <david.peris92@gmail.com>
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU Affero General Public License as
+ *    published by the Free Software Foundation, either version 3 of the
+ *    License, or (at your option) any later version.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Affero General Public License for more details.
  *
- * File: userstory-table.coffee
+ *    You should have received a copy of the GNU Affero General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function() {

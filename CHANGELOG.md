@@ -1,5 +1,8 @@
 # Changelog #
 
+## 1.2.1 (2016-06-15)
+- Updated license
+
 ## 1.2.0 (2016-06-07)
 - Removed auto initialization of task points
 
