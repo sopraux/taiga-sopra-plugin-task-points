@@ -17,6 +17,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
+module = angular.module('taigaContrib.taskpoints')
+
 debounce = (wait, func) ->
     return _.debounce(func, wait, {leading: true, trailing: false})
 
@@ -100,7 +102,6 @@ TaskPointsDirective = ($repo, $confirm, $loading, $http, $urls, service) ->
 
     return {link:link}
 
-module = angular.module('taigaContrib.taskpoints', ['taigaContrib.userstoryTable', 'taigaContrib.services'])
 
 module.controller("ContribTaskPointsAdminController", TaskPointsAdmin)
 module.directive("contribTaskPoints", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", "activationService", TaskPointsDirective])

@@ -17,16 +17,20 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
+from django.shortcuts import get_object_or_404
 
 from taiga.base import filters
 from taiga.base import response
 from taiga.base.api import ModelCrudViewSet
 from taiga.base.decorators import detail_route, list_route
+from taiga.projects.milestones.models import Milestone
+
+from taiga_contrib_holidays import services as holidays_service
 
 from . import models
 from . import serializers
 from . import permissions
-from . import services
+from . import services, external_services
 
 
 class TaskPointsSettingsViewSet(ModelCrudViewSet):
@@ -57,3 +61,43 @@ class TaskPointsSettingsViewSet(ModelCrudViewSet):
         #services.clear_all_tasks_subject(task_points_settings)
 
         return response.NoContent()
+
+
+    @detail_route(methods=['GET'])
+    def get_stats_taskpoints(self, request, pk=None):
+        task_points_settings = self.get_object()
+
+        milestone = get_object_or_404(Milestone, pk=request.GET['milestone'])
+
+        #self.check_permissions(request, "stats", milestone)
+
+        total_points = milestone.total_points
+        milestone_stats = {
+            'estimated_start': milestone.estimated_start,
+            'estimated_finish': milestone.estimated_finish,
+            'total_points': total_points,
+            'completed_points': milestone.closed_points.values(),
+            'total_userstories': milestone.cached_user_stories.count(),
+            'completed_userstories': milestone.cached_user_stories.filter(is_closed=True).count(),
+            'total_tasks': milestone.tasks.count(),
+            'completed_tasks': milestone.tasks.filter(status__is_closed=True).count(),
+            'days': []
+        }
+        current_date = milestone.estimated_start
+        sumTotalPoints = sum(total_points.values())
+        optimal_points = sumTotalPoints
+        days_list = holidays_service.get_working_days(milestone)
+
+        milestone_days = len(days_list)
+        optimal_points_per_day = sumTotalPoints / milestone_days if milestone_days else 0
+
+        for day in days_list:
+            milestone_stats['days'].append({
+                'day': day,
+                'name': day.day,
+                'open_points':  sumTotalPoints - external_services.total_closed_points_by_date(milestone, day, task_points_settings),
+                'optimal_points': optimal_points,
+            })
+            optimal_points -= optimal_points_per_day
+
+        return response.Ok(milestone_stats)

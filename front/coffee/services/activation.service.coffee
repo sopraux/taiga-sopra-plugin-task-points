@@ -17,18 +17,20 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
+class ActivationService
 
-serviceProvider = ($repo, $http) ->
-    service = {}
+    @.$inject = [
+        "$tgRepo",
+        "$tgHttp"
+    ]
 
-    service.activate = (settings) ->
-        $http.post($repo.resolveUrlForModel(settings) + '/activate')
+    constructor: (@repo, @http) ->
 
-    service.deactivate = (settings) ->
-        $http.post($repo.resolveUrlForModel(settings) + '/deactivate')
+    activate: (settings) ->
+        @http.post(@repo.resolveUrlForModel(settings) + '/activate')
 
-    return service
+    deactivate: (settings) ->
+        @http.post(@repo.resolveUrlForModel(settings) + '/deactivate')
 
 
-module = angular.module("taigaContrib.services", [])
-module.factory("activationService", ["$tgRepo", "$tgHttp", serviceProvider])
+angular.module('taigaContrib.taskpoints').service("activationService", ActivationService)

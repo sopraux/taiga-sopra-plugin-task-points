@@ -1,23 +1,18 @@
 div.userstory-table(contrib-userstory-table, ng-controller="ContribUserstoryTableAdminController as ctrl")
     header
         h1
-            span.project-name {{::project.name}}
             span.green {{::sectionName}}
 
     form
         fieldset
             label Select Sprint
             div.contrib-form-wrapper
-                select(
+                select.select-sprint(
                     ng-options="milestone as milestone.name for milestone in milestones track by milestone.id"
                     ng-model="selected"
+                    ng-change="changeSprint()"
                 )
             
-
-        button.button-green.submit-button(
-            type="submit"
-            title="Generate Table"
-        ) Generate Table
             
         div.basic-table(ng-hide="userstories.length < 1")
             div.table-header.row
@@ -43,3 +38,11 @@ div.userstory-table(contrib-userstory-table, ng-controller="ContribUserstoryTabl
                     ng-repeat="total in column_totals | orderBy: key"
                 ) {{ total.value }}
                 div {{ total_points }}
+        
+    header.sub-header
+        h1
+            span.green Burndown
+            
+    div.task-burndown
+        section.burndown-container
+            div.burndown

@@ -17,67 +17,45 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
-debounce = (wait, func) ->
-    return _.debounce(func, wait, {leading: true, trailing: false})
+class TableService
 
-
-class UserstoryTableAdmin
     @.$inject = [
-        "$rootScope",
-        "$scope",
-        "$tgRepo",
-        "tgAppMetaService",
-        "$tgConfirm",
-        "$tgHttp",
-        "$tgUrls"
+        "$tgRepo"
     ]
 
-    constructor: (@rootScope, @scope, @repo, @appMetaService, @confirm, @http) ->
-        @scope.sectionName = "User Stories table" # i18n
-        @scope.sectionSlug = "user stories table"
-        @scope.userstories = []
-        @scope.roles = []
+    constructor: (@repo) ->
 
-        @scope.$on "project:loaded", =>
-            promise = @repo.queryMany("milestones", {project: @scope.projectId})
-
-            promise.then (project_milestones) =>
-                @scope.milestones = project_milestones
-
-                @scope.selected = @get_present_milestone project_milestones
-
-
-    get_table: (@repo, $scope) ->
-        @repo.queryMany("roles", {project: $scope.projectId})
+    get_table: (@scope) ->
+        @repo.queryMany("roles", {project: @scope.projectId})
         .then (roles_data) =>
-            $scope.roles = roles_data
+            @scope.roles = roles_data
 
-            @repo.queryMany("userstories", {milestone: $scope.selected.id})
+            @repo.queryMany("userstories", {milestone: @scope.selected.id})
         .then (us_data) =>
-            $scope.userstories = us_data
+            @scope.userstories = us_data
 
-            @repo.queryMany("points", {project: $scope.projectId})
+            @repo.queryMany("points", {project: @scope.projectId})
         .then (points_data) =>
             points_map = @map_values(points_data)
             total_points = 0
-            for userstory, index in $scope.userstories
+            for userstory, index in @scope.userstories
                 points = []
                 total_points += userstory.total_points
 
                 for point_key, point_id of userstory.points     # get points of each role in userstory.points
                     points.push({ key: point_key, value: points_map[point_id] })
 
-                for role in $scope.roles       # add missing roles which arent returnt by the taiga api
+                for role in @scope.roles       # add missing roles which arent returnt by the taiga api
                     missing_role = true
                     for point in points when role.id.toString() is point.key
                         missing_role = false
                     if missing_role then points.push({ key: role.id.toString(), value: null })
 
-                $scope.userstories[index].points_value = points
+                @scope.userstories[index].points_value = points
 
-            @remove_unused_fields($scope.userstories, $scope.roles)
-            $scope.column_totals = @get_column_total_points($scope.userstories)
-            $scope.total_points  = total_points
+            @remove_unused_fields(@scope.userstories, @scope.roles)
+            @scope.column_totals = @get_column_total_points(@scope.userstories)
+            @scope.total_points  = total_points
 
 
 
@@ -124,10 +102,11 @@ class UserstoryTableAdmin
             else value = 0
             totals.push({ key: point.key, value: value })
 
-        for u in [1..userstories.length-1]
-            for point in userstories[u].points_value
-                for total, t in totals when total.key is point.key and point.value?
-                    totals[t].value += point.value
+        if userstories.length > 1
+            for u in [1..userstories.length-1]
+                for point in userstories[u].points_value
+                    for total, t in totals when total.key is point.key and point.value?
+                        totals[t].value += point.value
         return totals
 
 
@@ -153,46 +132,4 @@ class UserstoryTableAdmin
         return new Date(year, month, day)
 
 
-UserstoryTableDirective = ($repo, $confirm, $loading, $urls) ->
-    link = ($scope, $el, $attrs) ->
-        form = $el.find("form").checksley({"onlyOneErrorElement": true})
-        submit = debounce 2000, (event) =>
-            event.preventDefault()
-
-            return if not form.validate()
-
-            currentLoading = $loading()
-                .target(submitButton)
-                .start()
-
-
-            promise = UserstoryTableAdmin.prototype.get_table($repo, $scope)
-
-
-            promise.then (data)->
-                currentLoading.finish()
-                $confirm.notify("success")
-
-            promise.then null, (data) ->
-                currentLoading.finish()
-                form.setErrors(data)
-                if data._error_message
-                    $confirm.notify("error", data._error_message)
-
-        submitButton = $el.find(".submit-button")
-
-        $el.on "submit", "form", submit
-        $el.on "click", ".submit-button", submit
-
-    return {link:link}
-
-module = angular.module('taigaContrib.userstoryTable', [])
-
-module.controller("ContribUserstoryTableAdminController", UserstoryTableAdmin)
-module.directive("contribUserstoryTable", ["$tgRepo", "$tgConfirm", "$tgLoading", "$tgHttp", "$tgUrls", UserstoryTableDirective])
-
-initUserstoryTablePlugin = ($tgUrls) ->
-    $tgUrls.update({
-        "userstory_table": "/userstory_table"
-    })
-module.run(["$tgUrls", initUserstoryTablePlugin])
+angular.module('taigaContrib.taskpoints').service("tableService", TableService)

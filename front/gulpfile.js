@@ -1,11 +1,15 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
-var merge = require('merge-stream');
+var merge = require('merge-stream'),
+    path  = require('path');
 
 var paths = {
     styles: 'styles/all.scss',
     jade: 'partials/*.jade',
-    coffee: 'coffee/*.coffee',
+    coffee: [
+            '*.coffee',
+            path.join('coffee', '**', '*.coffee')
+        ],
     dist: 'dist/'
 };
 
