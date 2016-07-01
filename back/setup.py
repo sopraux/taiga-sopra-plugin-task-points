@@ -8,7 +8,7 @@ setup(
     name = 'taiga-contrib-taskpoints',
     version = ":versiontools:taiga_contrib_taskpoints:",
     description = "The Taiga plugin for task points",
-    long_description = read('README'),
+    long_description = "",
     keywords = 'taiga, task, points, integration',
     author = 'David Peris Martinez',
     author_email = 'david.peris92@gmail.com',

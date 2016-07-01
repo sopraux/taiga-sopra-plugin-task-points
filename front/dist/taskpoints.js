@@ -229,9 +229,11 @@ $templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-us
             _this.tableService.get_table(_this.scope);
             return _this.chartService.get_settings(_this.scope.projectId).then(function(settings) {
               var burndown;
-              burndown = $('.userstory-table .task-burndown');
-              if (settings.active) {
-                return _this.chartService.startDraw(burndown, _this.scope.selected, settings);
+              if (settings != null) {
+                burndown = $('.userstory-table .task-burndown');
+                if (settings.active) {
+                  return _this.chartService.startDraw(burndown, _this.scope.selected, settings);
+                }
               }
             });
           });
@@ -477,7 +479,7 @@ $templateCache.put("/plugins/taskpoints/userstory-table.html","\n<div contrib-us
           axisLabelUseCanvas: true,
           axisLabelFontSizePixels: 12,
           axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
-          axisLabelPadding: 5
+          axisLabelPadding: 10
         },
         yaxis: {
           min: 0,

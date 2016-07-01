@@ -53,8 +53,9 @@ class UserstoryTableAdmin
 
                 @chartService.get_settings(@scope.projectId)
                 .then (settings) =>
-                    burndown = $('.userstory-table .task-burndown')
-                    @chartService.startDraw(burndown, @scope.selected, settings) if settings.active
+                    if settings?
+                        burndown = $('.userstory-table .task-burndown')
+                        @chartService.startDraw(burndown, @scope.selected, settings) if settings.active
 
 
 module.controller("ContribUserstoryTableAdminController", UserstoryTableAdmin)

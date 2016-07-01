@@ -83,7 +83,7 @@ class ChartService
                 axisLabelUseCanvas: true
                 axisLabelFontSizePixels: 12
                 axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif'
-                axisLabelPadding: 5
+                axisLabelPadding: 10
             yaxis:
                 min: 0
                 axisLabel: @translate.instant("TASKBOARD.CHARTS.YAXIS_LABEL")
